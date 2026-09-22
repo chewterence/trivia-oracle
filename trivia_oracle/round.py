@@ -2,7 +2,6 @@ import asyncio
 import logging
 import re
 import threading
-from typing import Optional
 
 from qbreader.asynchronous import Async
 
@@ -166,27 +165,32 @@ def handle_round_answer(update, _context) -> None:
             scores[user.id]["name"] = user.first_name
 
     try:
-        prompt = _judge_answer(user, given)
-        if prompt:
-            _context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=f"🤔 {user.first_name}, Prompt on: {prompt}",
-                reply_to_message_id=update.message.message_id,
-            )
+        _judge_answer(user, given)
     finally:
         with checks_settled:
             current_round["pending_checks"] -= 1
             checks_settled.notify_all()
 
 
-def _judge_answer(user, given: str) -> Optional[str]:
+def _matches_prompt_hint(answerline: str, given: str) -> bool:
+    match = re.search(r'\[prompt on (.+?) before end\]', answerline, re.IGNORECASE)
+    if not match:
+        return False
+    answer_words = set(re.findall(r"[a-z]{4,}", given.lower()))
+    prompt_hints = set(re.findall(r'"([^\"]+)"', match.group(1)))
+    return any(answer_words & set(re.findall(r"[a-z]{4,}", hint.lower())) for hint in prompt_hints)
+
+
+def _judge_answer(user, given: str) -> None:
     try:
         judgement = asyncio.run(_check_answer(current_round["answerline"], given))
     except Exception as e:
         logging.error("Answer check failed: %s", e)
         return
 
-    if judgement.directive == "accept":
+    if judgement.directive in {"accept", "prompt"} or _matches_prompt_hint(
+        current_round["answerline"], given
+    ):
         with scores_lock:
             if user.id in current_round["winner_ids"]:
                 return
@@ -196,9 +200,6 @@ def _judge_answer(user, given: str) -> Optional[str]:
             current_round["winner_ids"].add(user.id)
             current_round["winners"].append((user.first_name, points))
         current_round["event"].set()
-
-    elif judgement.directive == "prompt":
-        return judgement.directed_prompt or "be more specific"
 
     elif judgement.directive == "reject":
         penalty = _penalty_for_wrong(user.id)

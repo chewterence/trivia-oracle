@@ -40,8 +40,8 @@ _in_flight_lock = threading.Lock()
 async def _fake_fetch_tossup():
     return SimpleNamespace(
         question_sanitized="First clue. Second clue. Third clue.",
-        answer_sanitized="Paris",
-        answer="Paris",
+        answer_sanitized="Haj",
+        answer='Haj [prompt on "Pilgrimage" or "Going to Mecca" or similar answers before end]',
     )
 
 
@@ -56,7 +56,7 @@ async def _fake_check_answer(answerline, given):
             _in_flight["now"] -= 1
     if given == "Paris?":
         return SimpleNamespace(directive="prompt", directed_prompt="France")
-    return SimpleNamespace(directive="accept" if given.lower() == answerline.lower() else "reject")
+    return SimpleNamespace(directive="accept" if given.lower() == "paris" else "reject")
 
 
 def _text_update(update_id: int, user: User, text: str) -> Update:
@@ -149,25 +149,25 @@ class ConcurrentCorrectAnswersTest(unittest.TestCase):
         self.assertEqual(scores[2]["score"], POINTS_PER_CORRECT)
         self.assertNotIn("Alice", self._round_end_text())
 
-    def test_directed_prompt_replies_without_scoring_or_ending_round(self):
+    def test_similar_prompt_hint_is_accepted(self):
+        alice = User(id=1, first_name="Alice", is_bot=False)
+        self._start_round()
+
+        self.updates.put(_text_update(1, alice, "Mecca journey"))
+        self._wait_for_round_end()
+
+        self.assertEqual(scores[1]["score"], POINTS_PER_CORRECT)
+        self.assertIn("Alice", self._round_end_text())
+
+    def test_qbreader_prompt_is_accepted(self):
         alice = User(id=1, first_name="Alice", is_bot=False)
         self._start_round()
 
         self.updates.put(_text_update(1, alice, "Paris?"))
-        for _ in range(50):
-            if any("Prompt on: France" in call.kwargs.get("text", "") for call in self.bot.send_message.call_args_list):
-                break
-            threading.Event().wait(0.05)
-
-        prompts = [call.kwargs for call in self.bot.send_message.call_args_list if "Prompt on: France" in call.kwargs.get("text", "")]
-        self.assertEqual(len(prompts), 1)
-        self.assertEqual(prompts[0]["chat_id"], CHAT.id)
-        self.assertEqual(prompts[0]["reply_to_message_id"], 1)
-        self.assertEqual(scores[1]["score"], 0)
-        self.assertTrue(rnd.current_round["active"])
-
-        rnd.current_round["event"].set()
         self._wait_for_round_end()
+
+        self.assertEqual(scores[1]["score"], POINTS_PER_CORRECT)
+        self.assertIn("Alice", self._round_end_text())
 
 
 if __name__ == "__main__":
