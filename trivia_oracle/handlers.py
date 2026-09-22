@@ -7,7 +7,7 @@ from telegram.ext import ConversationHandler
 
 from .config import (
     ADMIN_USERNAME, ALL_ARTS, ALL_SCIENCE, CATEGORIES, DEFAULT_SCORING_LABEL, DIFFICULTIES,
-    INPUT_VALUE, SCORING_MODE_DESCRIPTIONS, SCORING_MODES, SELECT_ADMIN,
+    INPUT_VALUE, MOCK_COST, SCORING_MODE_DESCRIPTIONS, SCORING_MODES, SELECT_ADMIN,
     SELECT_CATEGORIES, SELECT_DIFFICULTIES, SELECT_OPTION, SELECT_SCORING,
     SELECT_TIME_FIELD,
 )
@@ -23,6 +23,32 @@ from .settings import settings
 
 def show_scores(update, _context) -> None:
     update.message.reply_text(format_scoreboard())
+
+
+# ── /mock ─────────────────────────────────────────────────────────────────────
+
+def mock_answer(update, context) -> None:
+    target = update.message.reply_to_message
+    if target is None:
+        update.message.reply_text("Reply to an answer with /mock.")
+        return
+
+    user = update.effective_user
+    with scores_lock:
+        player = scores.get(user.id)
+        if player is None or player["score"] < MOCK_COST:
+            update.message.reply_text(f"You need {MOCK_COST} points to /mock.")
+            return
+        player["score"] -= MOCK_COST
+        save_scores()
+
+    answer = target.text or target.caption or "that one"
+    name = target.from_user.first_name
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=f"🤣 {name}: “{answer}” — bold strategy.",
+        reply_to_message_id=target.message_id,
+    )
 
 
 # ── /configure — entry point ──────────────────────────────────────────────────

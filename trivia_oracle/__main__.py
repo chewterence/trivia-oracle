@@ -20,6 +20,7 @@ from .handlers import (
     configure_toggle_category,
     configure_toggle_difficulty,
     error_handler,
+    mock_answer,
     show_scores,
 )
 from .round import handle_round_answer, start_round
@@ -31,6 +32,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 def register_handlers(dp) -> None:
     dp.add_handler(CommandHandler("next", start_round))
     dp.add_handler(CommandHandler("scores", show_scores))
+    dp.add_handler(CommandHandler("mock", mock_answer))
     dp.add_handler(ConversationHandler(
         entry_points=[CommandHandler("configure", configure)],
         states={
