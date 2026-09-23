@@ -15,6 +15,7 @@ from .keyboards import (
     build_admin_keyboard, build_category_keyboard, build_difficulty_keyboard,
     build_scoring_keyboard,
 )
+from .roasts import roast
 from .scores import format_scoreboard, save_scores, scores, scores_lock
 from .settings import settings
 
@@ -43,10 +44,9 @@ def mock_answer(update, context) -> None:
         save_scores()
 
     answer = target.text or target.caption or "that one"
-    name = target.from_user.first_name
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=f"🤣 {name}: “{answer}” — bold strategy.",
+        text=roast(answer),
         reply_to_message_id=target.message_id,
     )
 

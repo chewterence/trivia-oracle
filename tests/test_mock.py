@@ -28,13 +28,15 @@ class MockAnswerTest(unittest.TestCase):
         scores.clear()
 
     def test_mock_spends_two_points_and_replies_to_the_target(self):
-        with mock.patch("trivia_oracle.handlers.save_scores"):
+        with mock.patch("trivia_oracle.handlers.save_scores"), mock.patch(
+            "trivia_oracle.handlers.roast", return_value="🤣 custom roast"
+        ):
             mock_answer(self.update, self.context)
 
         self.assertEqual(scores[1]["score"], 8)
         self.context.bot.send_message.assert_called_once_with(
             chat_id=-100,
-            text='🤣 Bob: “Migration” — bold strategy.',
+            text="🤣 custom roast",
             reply_to_message_id=22,
         )
 
