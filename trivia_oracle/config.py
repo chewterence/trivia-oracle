@@ -33,6 +33,7 @@ SCORES_FILE = _setting("SCORES_FILE") or os.path.join(ROOT_DIR, "data", "scores.
 POINTS_PER_CORRECT = 10       # per correct answer; ×hourglasses left with "hourglass" on
 POINTS_PER_WRONG = 1          # "wrong_penalty" mode
 POINTS_PER_MEDAL_WRONG = 3    # "medal_penalty" mode, top-3 players only
+MOCK_COST = 2
 
 # ── Scoring modes: key → checkbox label (/configure → Scoring Mode) ─────────────
 # Modes are independent toggles and can be combined. None on = plain

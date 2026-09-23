@@ -24,6 +24,7 @@ A Telegram group trivia bot built just for fun by **Terence Chew**. Questions ar
 | `/next` | Start a new round |
 | `/scores` | Show the current scoreboard |
 | `/configure` | Configure timing, categories, difficulty, and scoring mode |
+| `/mock` (reply) | Spend 2 points to roast a message |
 
 During a round, just type your answer in the chat.
 
