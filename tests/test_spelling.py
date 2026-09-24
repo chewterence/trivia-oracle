@@ -34,7 +34,24 @@ class LenientSpellingTest(unittest.TestCase):
         answerline = "Sid Meier's Civilization"
         self.assertTrue(is_lenient_spelling_match(answerline, "Civilization"))
         self.assertTrue(is_lenient_spelling_match(answerline, "Civilisation"))
+        self.assertTrue(is_lenient_spelling_match(answerline, "civ"))
         self.assertFalse(is_lenient_spelling_match(answerline, "Colonization"))
+
+    def test_accepts_common_title_abbreviation_with_edition_number(self):
+        self.assertTrue(
+            is_lenient_spelling_match("Sid Meier's Civilization V", "civ 5")
+        )
+        self.assertFalse(
+            is_lenient_spelling_match("Sid Meier's Civilization IV", "civ 5")
+        )
+
+    def test_accepts_the_distinctive_word_from_a_longer_title(self):
+        self.assertTrue(
+            is_lenient_spelling_match("The Impostor from Among Us", "imposter")
+        )
+
+    def test_rejects_a_short_generic_title_word(self):
+        self.assertFalse(is_lenient_spelling_match("The King and I", "king"))
 
     def test_never_overrides_explicit_rejects(self):
         self.assertFalse(
