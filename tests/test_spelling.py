@@ -23,6 +23,20 @@ class LenientSpellingTest(unittest.TestCase):
     def test_rejects_an_unrelated_joke_answer(self):
         self.assertFalse(is_lenient_spelling_match(ANSWERLINE, "Chuck norris"))
 
+    def test_accepts_qbreader_diacritic_and_spelling_variants(self):
+        self.assertTrue(is_lenient_spelling_match("Muhammed", "Mohamad"))
+        self.assertTrue(is_lenient_spelling_match("Bahá’ í", "bahai"))
+
+    def test_never_overrides_explicit_rejects(self):
+        self.assertFalse(
+            is_lenient_spelling_match(
+                'adsorption [do not accept or prompt on “absorption”]', "absorption"
+            )
+        )
+        self.assertFalse(
+            is_lenient_spelling_match('realignments [reject “dealignments”]', "dealignments")
+        )
+
     def test_round_accepts_a_lenient_spelling_after_qbreader_rejects_it(self):
         scores.clear()
         scores[1] = {"name": "Alice", "score": 0}

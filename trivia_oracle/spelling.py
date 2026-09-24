@@ -39,10 +39,19 @@ def _damerau_levenshtein(left: str, right: str) -> int:
     return distances[-1][-1]
 
 
+def _explicitly_rejects(answerline: str, answer: str) -> bool:
+    patterns = re.findall(
+        r'(?:reject|do not accept(?: or prompt)?(?: on)?)\s+["“]([^"”]+)["”]',
+        answerline,
+        re.IGNORECASE,
+    )
+    return any(_normalize(pattern) == answer for pattern in patterns)
+
+
 def is_lenient_spelling_match(answerline: str, given: str) -> bool:
     primary_answer = re.sub(r"<[^>]+>", "", answerline.split("[", 1)[0])
     reference = _normalize(primary_answer)
     answer = _normalize(given)
-    if not reference or not answer:
+    if not reference or not answer or _explicitly_rejects(answerline, answer):
         return False
     return SPELLING_STRICTNESS * _damerau_levenshtein(reference, answer) <= len(reference)
