@@ -30,6 +30,12 @@ class LenientSpellingTest(unittest.TestCase):
     def test_accepts_repeated_letter_omissions_in_long_unambiguous_answers(self):
         self.assertTrue(is_lenient_spelling_match("Mississippi", "misisipi"))
 
+    def test_accepts_common_short_titles_and_regional_spelling_variants(self):
+        answerline = "Sid Meier's Civilization"
+        self.assertTrue(is_lenient_spelling_match(answerline, "Civilization"))
+        self.assertTrue(is_lenient_spelling_match(answerline, "Civilisation"))
+        self.assertFalse(is_lenient_spelling_match(answerline, "Colonization"))
+
     def test_never_overrides_explicit_rejects(self):
         self.assertFalse(
             is_lenient_spelling_match(
