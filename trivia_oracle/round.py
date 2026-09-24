@@ -12,6 +12,7 @@ from .config import (
 )
 from .scores import format_scoreboard, medalist_ids, save_scores, scores, scores_lock
 from .settings import settings
+from .spelling import is_lenient_spelling_match
 
 # ── Round state ───────────────────────────────────────────────────────────────
 
@@ -186,7 +187,10 @@ def _judge_answer(user, given: str) -> Optional[str]:
         logging.error("Answer check failed: %s", e)
         return
 
-    if judgement.directive == "accept":
+    if judgement.directive == "accept" or (
+        judgement.directive == "reject"
+        and is_lenient_spelling_match(current_round["answerline"], given)
+    ):
         with scores_lock:
             if user.id in current_round["winner_ids"]:
                 return
