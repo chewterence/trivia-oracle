@@ -27,6 +27,9 @@ class LenientSpellingTest(unittest.TestCase):
         self.assertTrue(is_lenient_spelling_match("Muhammed", "Mohamad"))
         self.assertTrue(is_lenient_spelling_match("Bahá’ í", "bahai"))
 
+    def test_accepts_repeated_letter_omissions_in_long_unambiguous_answers(self):
+        self.assertTrue(is_lenient_spelling_match("Mississippi", "misisipi"))
+
     def test_never_overrides_explicit_rejects(self):
         self.assertFalse(
             is_lenient_spelling_match(
