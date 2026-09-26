@@ -75,6 +75,7 @@ class ConcurrentCorrectAnswersTest(unittest.TestCase):
         # defaults=None: a bare Mock's truthy `defaults.run_async` would make
         # every handler async and hide the production behaviour.
         self.bot = mock.Mock(username="TriviaOracleBot", defaults=None)
+        self.chat_data = {}
         self.updates = queue.Queue()
         self.dp = Dispatcher(self.bot, self.updates, workers=4, use_context=True)
         register_handlers(self.dp)
@@ -107,7 +108,7 @@ class ConcurrentCorrectAnswersTest(unittest.TestCase):
 
     def _start_round(self):
         update = SimpleNamespace(effective_chat=CHAT)
-        rnd.start_round(update, SimpleNamespace(bot=self.bot))
+        rnd.start_round(update, SimpleNamespace(bot=self.bot, chat_data=self.chat_data))
         self.assertTrue(rnd.current_round["active"])
 
     def _wait_for_round_end(self):

@@ -26,6 +26,8 @@ A Telegram group trivia bot built just for fun by **Terence Chew**. Questions ar
 | `/configure` | Configure timing, categories, difficulty, and scoring mode |
 
 During a round, just type your answer in the chat.
+Questions won't repeat in the same chat until 30 minutes pass without a successful `/next` starting a question.
+This history is kept in memory and clears when the bot restarts.
 
 ---
 
